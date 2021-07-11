@@ -4,11 +4,14 @@
 const express = require('express');
 const morgan = require('morgan');
 
+// Importing the instance of sequelize from "models/index"
+const { sequelize } = require('./models');
+
+// Importing routes
+const routes = require('./routes');
+
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
-
-// importing the instance of sequelize from "models/index"
-const { sequelize } = require('./models');
 
 // Synchronizing the model and testing the connection to the database
 (async () => {
@@ -25,6 +28,9 @@ const { sequelize } = require('./models');
 // create the Express app
 const app = express();
 
+// setting JSON as the format of incomming requests
+app.use(express.json());
+
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
 
@@ -34,6 +40,9 @@ app.get('/', (req, res) => {
     message: 'Welcome to the REST API project!',
   });
 });
+
+// Calling the routes
+app.use('/api', routes);
 
 // send 404 if no other route matched
 app.use((req, res) => {
