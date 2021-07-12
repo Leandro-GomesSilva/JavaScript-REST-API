@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const { User } = require('../models');
 const { Course } = require('../models');
 
@@ -11,7 +12,7 @@ const router = express.Router();
  * 
  *******************/
 
-// Get all users
+/***  Get all users   ***/
 router.get('/users', async (req, res) => {
   const users = await User.findAll();
   res
@@ -19,7 +20,7 @@ router.get('/users', async (req, res) => {
     .json(users);
 });
 
-// Create a new user
+/***  Create a new user  ***/
 router.post('/users', async (req, res) => {
   const errors = [];    // Defining Array where errors will be stored
   
@@ -34,6 +35,7 @@ router.post('/users', async (req, res) => {
       .status(400)
       .json({ errors });
   } else {
+    req.body.password = bcrypt.hashSync(req.body.password, 10);   // Hashing password before persisting user to the database
     await User.create(req.body);
     res
       .location('/')
@@ -48,7 +50,7 @@ router.post('/users', async (req, res) => {
  * 
  *******************/
 
-/*** Get all courses ***/
+/***  Get all courses   ***/
 router.get('/courses', async (req, res) => {
   const courses = await Course.findAll();
   res
@@ -56,7 +58,7 @@ router.get('/courses', async (req, res) => {
     .json(courses);
 });
 
-/*** Get course by ID ***/
+/***  Get course by ID  ***/
 router.get('/courses/:id', async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   res
@@ -64,7 +66,7 @@ router.get('/courses/:id', async (req, res) => {
     .json(course);
 });
 
-/*** Create a new course ***/
+/***  Create a new course   ***/
 router.post('/courses', async (req, res) => {
   const errors = [];    // Defining Array where errors will be stored
 
@@ -86,7 +88,7 @@ router.post('/courses', async (req, res) => {
   }
 });
 
-/*** Update course with an ID ":id" ***/
+/***  Update course with an ID ":id"  ***/
 router.put('/courses/:id', async (req, res) => {
   const errors = [];    // Defining Array where errors will be stored
 
@@ -107,7 +109,7 @@ router.put('/courses/:id', async (req, res) => {
   }
 });
 
-/*** Delete course with an ID ":id" ***/
+/***  Delete course with an ID ":id"  ***/
 router.delete('/courses/:id', async (req, res) => {
   try{
     const course = await Course.findByPk(req.params.id);
