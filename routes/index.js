@@ -48,7 +48,7 @@ router.post('/users', async (req, res) => {
  * 
  *******************/
 
-// Get all courses
+/*** Get all courses ***/
 router.get('/courses', async (req, res) => {
   const courses = await Course.findAll();
   res
@@ -56,7 +56,7 @@ router.get('/courses', async (req, res) => {
     .json(courses);
 });
 
-// Get course by ID
+/*** Get course by ID ***/
 router.get('/courses/:id', async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   res
@@ -64,7 +64,7 @@ router.get('/courses/:id', async (req, res) => {
     .json(course);
 });
 
-// Create a new course
+/*** Create a new course ***/
 router.post('/courses', async (req, res) => {
   const errors = [];    // Defining Array where errors will be stored
 
@@ -86,7 +86,7 @@ router.post('/courses', async (req, res) => {
   }
 });
 
-// Update course with an ID ":id"
+/*** Update course with an ID ":id" ***/
 router.put('/courses/:id', async (req, res) => {
   const errors = [];    // Defining Array where errors will be stored
 
@@ -107,7 +107,7 @@ router.put('/courses/:id', async (req, res) => {
   }
 });
 
-// Delete course with an ID ":id"
+/*** Delete course with an ID ":id" ***/
 router.delete('/courses/:id', async (req, res) => {
   try{
     const course = await Course.findByPk(req.params.id);
