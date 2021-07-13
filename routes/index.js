@@ -2,7 +2,10 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const { User } = require('../models');
 const { Course } = require('../models');
+
+// Requiring Custom Middlewares
 const { asyncHandler } = require('../middleware/async-handler');
+const { userBasicAuthentication } = require('../middleware/basic-auth-user');
 const { serverSideValidation } = require('../middleware/server-side-validation');
 
 // Initializing a Router instance
@@ -17,7 +20,7 @@ const router = express.Router();
 /***  Get all users   ***/
 
 // Retrieving all users and responding with status 200 and 'users' as json
-router.get('/users', asyncHandler(async (req, res) => {
+router.get('/users', userBasicAuthentication, asyncHandler(async (req, res) => {
   const users = await User.findAll();
   res
     .status(200)
@@ -79,7 +82,7 @@ router.get('/courses/:id', asyncHandler(async (req, res) => {
 
 /***  Create a new course   ***/
 
-router.post('/courses', asyncHandler(async (req, res) => {
+router.post('/courses', userBasicAuthentication, asyncHandler(async (req, res) => {
 
   // Validating title and description with the custom middleware - errors are stored in the errors array
   const errors = serverSideValidation(req, res, 2, "title", "description");
@@ -102,7 +105,7 @@ router.post('/courses', asyncHandler(async (req, res) => {
 
 /***  Update course with an ID ":id"  ***/
 
-router.put('/courses/:id', asyncHandler(async (req, res) => {
+router.put('/courses/:id', userBasicAuthentication, asyncHandler(async (req, res) => {
 
   // Validating title and description with the custom middleware - errors are stored in the errors array
   const errors = serverSideValidation(req, res, 2, "title", "description");
@@ -124,7 +127,7 @@ router.put('/courses/:id', asyncHandler(async (req, res) => {
 
 /***  Delete course with ID ":id"  ***/
 
-router.delete('/courses/:id', asyncHandler(async (req, res) => {
+router.delete('/courses/:id', userBasicAuthentication, asyncHandler(async (req, res) => {
   
   // Deleting course and returning status 204
   const course = await Course.findByPk(req.params.id);
