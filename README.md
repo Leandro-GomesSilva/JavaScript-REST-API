@@ -9,9 +9,15 @@
 
 ## For "Exceeds Requirements":
   - E-mail address validation and constraint (valid and unique)
-  - Some attributes are filtered out of the response
+  - Irrelevant attributes are filtered out of the response
   - Users POST route handles a Sequelize Constraint Error
   - PUT and DELETE routes ensures that authenticated user is indeed the course's owner
 
 ## Extras:
   - Modularization of the server-side validation via the "server-side-validation" Middleware
+
+## Instructions:
+  - Download or clone the repository
+  - Run "npm install" to install all dependencies
+  - Run "npm run seed" to create the initial database and seed it with initial data
+  - The file "RESTAPI.postman_collection.json" can be imported into Postman and used to test the application
