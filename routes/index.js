@@ -116,21 +116,34 @@ router.post('/courses', userBasicAuthentication, asyncHandler(async (req, res) =
 
 router.put('/courses/:id', userBasicAuthentication, asyncHandler(async (req, res) => {
 
-  // Validating title and description with the custom middleware - errors are stored in the errors array
-  const errors = serverSideValidation(req, res, 2, "title", "description");
+  // Querying course object with 'id' parameter and storing it in a variable
+  const course = await Course.findByPk(req.params.id);
 
-  if (errors.length > 0) {
-    // Returning status 400 and error messages in case any error
-    res
-      .status(400)
-      .json({ errors });
-  } else {
-    // Updating course and returning status 204
-    const course = await Course.findByPk(req.params.id);
-    await course.update(req.body);
-    res
-      .status(204)
-      .end();
+  // Storing the user ID of the authenticated user into a variable
+  const authenticatedId = req.currentUser.id;
+  
+  if (authenticatedId == course.userId) {   // Checking if authenticated user owns the course
+    
+    // Validating title and description with the custom middleware - errors are stored in the errors array
+    const errors = serverSideValidation(req, res, 2, "title", "description");
+
+    if (errors.length > 0) {
+      // Returning status 400 and error messages in case any error
+      res
+        .status(400)
+        .json({ errors });
+    } else {
+      
+      await course.update(req.body);
+      res
+        .status(204)
+        .end();
+    }
+
+  } else {    // In case authenticated user does not own the course...
+    res   // ... returns status 403 ('Forbidden') and an error message
+    .status(403)
+    .json({ "message": "Forbidden - currently authenticated user does not own the course" });
   }
 }));
 
@@ -138,12 +151,23 @@ router.put('/courses/:id', userBasicAuthentication, asyncHandler(async (req, res
 
 router.delete('/courses/:id', userBasicAuthentication, asyncHandler(async (req, res) => {
   
-  // Deleting course and returning status 204
+  // Querying course object with 'id' parameter and storing it in a variable
   const course = await Course.findByPk(req.params.id);
-  await course.destroy();
-  res
-    .status(204)
-    .end();
+
+  // Storing the user ID of the authenticated user into a variable
+  const authenticatedId = req.currentUser.id;
+  
+  if (authenticatedId == course.userId) {   // Checking if authenticated user owns the course
+    await course.destroy();   // Deleting course
+    res   // Returning status 204 and ending response
+      .status(204)
+      .end();
+
+  } else {    // In case authenticated user does not own the course...
+    res   // ... returns status 403 ('Forbidden') and an error message
+    .status(403)
+    .json({ "message": "Forbidden - currently authenticated user does not own the course" });
+  }
 }));
 
 module.exports = router;
