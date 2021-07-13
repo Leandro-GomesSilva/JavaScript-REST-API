@@ -21,7 +21,7 @@ const router = express.Router();
 
 // Retrieving all users and responding with status 200 and 'users' as json
 router.get('/users', userBasicAuthentication, asyncHandler(async (req, res) => {
-  const users = await User.findAll();
+  const users = await User.findAll({ attributes: { exclude: ['password', 'createdAt', 'updatedAt'] } });    // Filtering out some attributes from the SQL query
   res
     .status(200)
     .json(users);
@@ -31,24 +31,33 @@ router.get('/users', userBasicAuthentication, asyncHandler(async (req, res) => {
 
 router.post('/users', asyncHandler(async (req, res) => {
   
-  // Validating firstName, lastName, emailAddress and password with the custom middleware - errors are stored in the errors array
-  const errors = serverSideValidation(req, res, 4, "firstName", "lastName", "emailAddress", "password");
-  
-  if (errors.length > 0) {
-    // Returning status 400 and error messages in case any error
-    res
-      .status(400)
-      .json({ errors });
-  } else {
-    // Hashing password before persisting user to the database
-    req.body.password = bcrypt.hashSync(req.body.password, 10);
+  try {
+    // Validating firstName, lastName, emailAddress and password with the custom middleware - errors are stored in the errors array
+    const errors = serverSideValidation(req, res, 4, "firstName", "lastName", "emailAddress", "password");
     
-    // Creating user in the database, setting location header and returning status 201
-    await User.create(req.body);
-    res
-      .location('/')
-      .status(201)
-      .end();
+    if (errors.length > 0) {
+      // Returning status 400 and error messages in case any error
+      res
+        .status(400)
+        .json({ errors });
+    } else {
+      // Hashing password before persisting user to the database
+      req.body.password = bcrypt.hashSync(req.body.password, 10);
+      
+      // Creating user in the database, setting location header and returning status 201
+      await User.create(req.body);
+      res
+        .location('/')
+        .status(201)
+        .end();
+    }
+  } catch(error) {    // Checking and handling Sequelize Unique Constraint errors
+      if (error.name === 'SequelizeUniqueConstraintError') {   
+        const errors = error.errors.map(err => err.message);    // Extracting the error message of each error.errors array
+        res.status(400).json({ errors });   // Returning status 400 (Bad Request) and the error messages
+      } else {
+        throw error;
+    }
   }
 }));
 
@@ -63,7 +72,7 @@ router.post('/users', asyncHandler(async (req, res) => {
 router.get('/courses', asyncHandler(async (req, res) => {
   
   // Retrieving all courses and responding with status 200 and 'courses' as json
-  const courses = await Course.findAll();
+  const courses = await Course.findAll({ attributes: { exclude: ['createdAt', 'updatedAt'] } });    // Filtering out some attributes from the SQL query
   res
     .status(200)
     .json(courses);
@@ -74,7 +83,7 @@ router.get('/courses', asyncHandler(async (req, res) => {
 router.get('/courses/:id', asyncHandler(async (req, res) => {
   
   // Finding course and responding with status 200 and 'course' as json
-  const course = await Course.findByPk(req.params.id);
+  const course = await Course.findByPk(req.params.id, { attributes: { exclude: ['createdAt', 'updatedAt'] } });   // Filtering out some attributes from the SQL query
   res
     .status(200)
     .json(course);
