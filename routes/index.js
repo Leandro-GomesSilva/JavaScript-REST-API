@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const { User } = require('../models');
 const { Course } = require('../models');
 const { asyncHandler } = require('../middleware/async-handler');
+const { serverSideValidation } = require('../middleware/server-side-validation');
 
 // Initializing a Router instance
 const router = express.Router();
@@ -26,13 +27,9 @@ router.get('/users', asyncHandler(async (req, res) => {
 /***  Create a new user  ***/
 
 router.post('/users', asyncHandler(async (req, res) => {
-  const errors = [];    // Defining Array where errors will be stored
   
-  // Validating firstName, lastName, emailAddress and password with ternary operators
-  !req.body.firstName ? errors.push('Please provide a value for "firstName"') : null;
-  !req.body.lastName ? errors.push('Please provide a value for "lastName"') : null;
-  !req.body.emailAddress ? errors.push('Please provide a value for "e-mail address"') : null;
-  !req.body.password ? errors.push('Please provide a value for "password"') : null;
+  // Validating firstName, lastName, emailAddress and password with the custom middleware - errors are stored in the errors array
+  const errors = serverSideValidation(req, res, 4, "firstName", "lastName", "emailAddress", "password");
   
   if (errors.length > 0) {
     // Returning status 400 and error messages in case any error
@@ -83,11 +80,9 @@ router.get('/courses/:id', asyncHandler(async (req, res) => {
 /***  Create a new course   ***/
 
 router.post('/courses', asyncHandler(async (req, res) => {
-  const errors = [];    // Defining Array where errors will be stored
 
-  // Validating title and description with ternary operators
-  !req.body.title ? errors.push('Please provide a value for "title"') : null;
-  !req.body.description ? errors.push('Please provide a value for "description"') : null;
+  // Validating title and description with the custom middleware - errors are stored in the errors array
+  const errors = serverSideValidation(req, res, 2, "title", "description");
 
   if (errors.length > 0) {
     // Returning status 400 and error messages in case any error
@@ -108,11 +103,9 @@ router.post('/courses', asyncHandler(async (req, res) => {
 /***  Update course with an ID ":id"  ***/
 
 router.put('/courses/:id', asyncHandler(async (req, res) => {
-  const errors = [];    // Defining Array where errors will be stored
 
-  // Validating title and description with ternary operators
-  !req.body.title ? errors.push('Please provide a value for "title"') : null;
-  !req.body.description ? errors.push('Please provide a value for "description"') : null;
+  // Validating title and description with the custom middleware - errors are stored in the errors array
+  const errors = serverSideValidation(req, res, 2, "title", "description");
 
   if (errors.length > 0) {
     // Returning status 400 and error messages in case any error
