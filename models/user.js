@@ -36,7 +36,6 @@ module.exports = (sequelize, DataTypes) => {
   // Creating model association
   User.associate = (models) => {
     User.hasMany(models.Course, {
-      as: 'alias',
       foreignKey: {
         fieldName: 'userId',
         allowNull: false,

@@ -17,11 +17,14 @@ const router = express.Router();
  * 
  *******************/
 
-/***  Get all users   ***/
+/***  Get currently authenticated user   ***/
 
-// Retrieving all users and responding with status 200 and 'users' as json
+// Retrieving the currently authenticated user and responding with a status 200 ('Ok') and the user's properties and values as json
 router.get('/users', userBasicAuthentication, asyncHandler(async (req, res) => {
-  const users = await User.findAll({ attributes: { exclude: ['password', 'createdAt', 'updatedAt'] } });    // Filtering out some attributes from the SQL query
+  
+  const currentUser = req.currentUser;    // Storing the authenticated user's object into a variable
+  
+  const users = await User.findByPk(currentUser.id, { attributes: { exclude: ['password', 'createdAt', 'updatedAt'] } });    // Finding by user's Id and filtering out some attributes from the SQL query
   res
     .status(200)
     .json(users);
@@ -72,7 +75,13 @@ router.post('/users', asyncHandler(async (req, res) => {
 router.get('/courses', asyncHandler(async (req, res) => {
   
   // Retrieving all courses and responding with status 200 and 'courses' as json
-  const courses = await Course.findAll({ attributes: { exclude: ['createdAt', 'updatedAt'] } });    // Filtering out some attributes from the SQL query
+  const courses = await Course.findAll({ 
+    attributes: { exclude: ['createdAt', 'updatedAt'] },    // Filtering out some attributes from the SQL query
+    include: { 
+      model: User,    // Including the user associated with each course
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] },    // Filtering out some attributes of the user as well
+    },
+  });
   res
     .status(200)
     .json(courses);
@@ -83,7 +92,13 @@ router.get('/courses', asyncHandler(async (req, res) => {
 router.get('/courses/:id', asyncHandler(async (req, res) => {
   
   // Finding course and responding with status 200 and 'course' as json
-  const course = await Course.findByPk(req.params.id, { attributes: { exclude: ['createdAt', 'updatedAt'] } });   // Filtering out some attributes from the SQL query
+  const course = await Course.findByPk(req.params.id, { 
+    attributes: { exclude: ['createdAt', 'updatedAt'] },    // Filtering out some attributes from the SQL query
+    include: { 
+      model: User,    // Including the user associated with each course
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] },    // Filtering out some attributes of the user as well
+    },
+  });
   res
     .status(200)
     .json(course);
